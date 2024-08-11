@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">LineFollower</string>
+    <string name="settings">Grant permission</string>
+    <string name="camera_permission_not_available">Camera permission denied. Please enable it in Settings</string>
+    <string name="camera_permission_not_granted">Camera permission is needed to use this feature</string>
+    <string name="settings_button_text">Settings</string>
+    <string name="dismiss_button_text">Cancel</string>
+    <string name="bluetooth_screen_title">Dispositivos Bluetooth</string>
+    <string name="pid_description">Calibra las constantes PID para optimizar el rendimiento del sistema.</string>
+    <string name="connect">Connect</string>
+    <string name="connected_to_snack_message">Connected to %1$s</string>
+    <string name="ble_device_screen">BLE Devices</string>
+    <string name="pid_tuning_screen">PID Tuning</string>
+    <string name="top_appbar_title">TopAppBarTitle</string>
+    <string name="top_appbar_action">top_appbar_action\n</string>
+    <string name="bluetooth_icon">Bluetooth</string>
+    <string name="scanning_label">BLE Scanning</string>
+    <string name="scanner_screen_title">Found Devices</string>
+    <string name="default_title"> </string>
+</resources>
