@@ -1,9 +1,17 @@
 package yao.ic.linefollower.ui.screens.bluetooth_scanner
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.res.Configuration
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +22,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.rounded.Bluetooth
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.Card
@@ -31,24 +41,29 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import soup.compose.material.motion.MaterialSharedAxisZ
 import soup.compose.material.motion.animation.materialFadeThrough
 import soup.compose.material.motion.animation.materialSharedAxisY
 import soup.compose.material.motion.animation.rememberSlideDistance
 import yao.ic.linefollower.R
 import yao.ic.linefollower.data.model.BLEDevice
 import yao.ic.linefollower.data.state.BluetoothUIState
-import yao.ic.linefollower.ui.components.RippleAnimation
 import yao.ic.linefollower.ui.theme.LineFollowerTheme
 
 
@@ -58,12 +73,14 @@ fun BluetoothScannerScreen(
     state: BluetoothUIState = BluetoothUIState(),
     onConnect: (BLEDevice) -> Unit = {},
 ) {
-
-    AnimatedContent(
+    val activity = LocalContext.current as Activity
+    BackHandler { activity.finishAffinity() }
+    MaterialSharedAxisZ(
         modifier = modifier
             .fillMaxSize(),
         targetState = state.isScanning,
         label = stringResource(R.string.scanning_label),
+        forward = true
     ) { isScanning ->
 
         if (isScanning)
@@ -219,6 +236,83 @@ private fun BLEDeviceItem(
             ),
         )
     )
+}
+
+@Composable
+fun RippleAnimation(
+    circleColor: Color = MaterialTheme.colorScheme.primary,
+    animationDelay: Int = 1800,
+    size: Dp = 400.dp,
+) {
+
+    // 3 circles
+    val circles = listOf(
+        remember { Animatable(0f) },
+        remember { Animatable(0f) },
+        remember { Animatable(0f) },
+        remember { Animatable(0f) },
+        remember { Animatable(0f) }
+    )
+
+    circles.forEachIndexed { index, circle ->
+        LaunchedEffect(Unit) {
+            // Use coroutine delay to sync animations
+            // divide the animation delay by number of circles
+            delay(timeMillis = (animationDelay / circles.size.toLong()) * (index + 1))
+
+            circle.animateTo(
+                targetValue = 1f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(
+                        durationMillis = animationDelay,
+                        easing = LinearEasing
+                    ),
+                    repeatMode = RepeatMode.Restart
+                )
+            )
+        }
+    }
+
+    // outer circle
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color.Transparent),
+        contentAlignment = Alignment.Center
+    ) {
+        // animating circles
+        circles.forEach { circle ->
+            Box(
+                modifier = Modifier
+                    .scale(scale = circle.value)
+                    .size(size = size)
+                    .clip(shape = CircleShape)
+                    .background(
+                        color = circleColor
+                            .copy(alpha = (1 - circle.value))
+                    )
+            )
+        }
+
+        // inner circle
+        Box(
+            modifier = Modifier
+                .size(size = size.div(3.5f))
+                .clip(shape = CircleShape)
+                .background(color = circleColor)
+        ) {
+            // inner circle content
+            Icon(
+                imageVector = Icons.Default.Bluetooth,
+                contentDescription = stringResource(R.string.bluetooth_icon),
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier
+                    .fillMaxSize(0.4f)
+                    .align(alignment = Alignment.Center)
+            )
+        }
+
+    }
 }
 
 private val devices = sequenceOf(

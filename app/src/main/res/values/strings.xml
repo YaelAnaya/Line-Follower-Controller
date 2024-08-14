@@ -17,4 +17,7 @@
     <string name="scanning_label">BLE Scanning</string>
     <string name="scanner_screen_title">Found Devices</string>
     <string name="default_title"> </string>
+    <string name="refresh">Refresh BLE Devices List</string>
+    <string name="disconnect">Disconnect from BLE device</string>
+    <string name="topappbar_animatedcontent">TopAppBar-AnimatedContent</string>
 </resources>

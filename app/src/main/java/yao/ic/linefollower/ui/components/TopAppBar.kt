@@ -2,11 +2,7 @@ package yao.ic.linefollower.ui.components
 
 import android.annotation.SuppressLint
 import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.layout.offset
+import androidx.compose.animation.togetherWith
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BluetoothDisabled
 import androidx.compose.material.icons.filled.Replay
@@ -17,83 +13,102 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
+import soup.compose.material.motion.MaterialFadeThrough
+import soup.compose.material.motion.MaterialMotion
+import soup.compose.material.motion.animation.materialSharedAxisYIn
+import soup.compose.material.motion.animation.materialSharedAxisYOut
 import soup.compose.material.motion.animation.rememberSlideDistance
 import yao.ic.linefollower.R
-import yao.ic.linefollower.ui.LocalBackStackEntry
+import yao.ic.linefollower.domain.ble.BLEController
 import yao.ic.linefollower.ui.navigation.BLEScanner
-
-private val enterTransition = scaleIn(animationSpec = tween())
-private val exitTransition = scaleOut(animationSpec = tween())
-
 
 @SuppressLint("RestrictedApi")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopAppBar(
     modifier: Modifier = Modifier,
-    @StringRes titleRes: Int = determineCurrentTitle(),
-    action: TopAppBarAction? = null
+    destination: NavDestination?,
+    controller: BLEController,
+    screenInfo: ScreenInfo = getScreenInfo(destination, controller)
 ) {
+    val controllerState by controller.state.collectAsState()
+    val slideDistance = rememberSlideDistance(slideDistance = 35.dp)
 
-    val slideDistance = rememberSlideDistance(slideDistance = 30.dp)
-    AnimatedContent(
-        targetState = titleRes,
-        label = "TopAppBar-AnimatedContent",
+    MaterialMotion(
+        targetState = controllerState.isScanning,
+        label = stringResource(R.string.topappbar_animatedcontent),
+        transitionSpec = { materialSharedAxisYIn(forward = false, slideDistance) togetherWith materialSharedAxisYOut(forward = true, slideDistance) },
+        pop = false
     ) { state ->
         TopAppBar(
             modifier = modifier,
             title = {
-                Text(
-                    text = stringResource(state),
-                    style = MaterialTheme.typography.headlineMedium
-                )
+                if (!state) {
+                    Text(
+                        text = stringResource(screenInfo.titleRes),
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+                }
             },
             actions = {
-                action?.let {
-                    IconButton(
-                        onClick = it.onClick,
-                        modifier = Modifier
-                    ) {
-                        Icon(
-                            imageVector = it.icon,
-                            contentDescription = it.contentDescription
-                        )
+                if (!state) {
+                    MaterialFadeThrough(targetState = screenInfo.action) { action ->
+                        IconButton(onClick = action.onClick) {
+                            Icon(
+                                imageVector = action.icon,
+                                contentDescription = stringResource(action.descriptionRes)
+                            )
+                        }
+
                     }
                 }
-            }
+
+            },
         )
     }
-
-
 }
 
 @Composable
-private fun determineCurrentTitle() : Int {
-    val destination = LocalBackStackEntry.current.value?.destination
-    return if (destination?.hasRoute<BLEScanner>() == true) {
-        R.string.scanner_screen_title
+private fun getScreenInfo(
+    destination: NavDestination?,
+    controller: BLEController
+): ScreenInfo {
+    val isScanner = destination?.hasRoute<BLEScanner>() == true
+
+    return if (isScanner) {
+        ScreenInfo(
+            titleRes = R.string.scanner_screen_title,
+            action = TopAppBarAction(
+                icon = Icons.Default.Replay,
+                descriptionRes = R.string.scanning_label
+            ) { controller.scanDevices() }
+        )
     } else {
-        R.string.default_title
+        ScreenInfo(
+            titleRes = R.string.default_title,
+            action = TopAppBarAction(
+                icon = Icons.Default.BluetoothDisabled,
+                descriptionRes = R.string.default_title
+            ) { controller.disconnect() }
+        )
     }
 }
 
-sealed class TopAppBarAction(
+data class ScreenInfo(
+    @StringRes val titleRes: Int,
+    val action: TopAppBarAction
+)
+
+data class TopAppBarAction(
     val icon: ImageVector,
-    val contentDescription: String,
+    @StringRes val descriptionRes: Int,
     val onClick: () -> Unit = {}
-)
-
-data object Refresh : TopAppBarAction(
-    icon = Icons.Filled.Replay,
-    contentDescription = "Refresh"
-)
-
-data object Disconnect : TopAppBarAction(
-    icon = Icons.Filled.BluetoothDisabled,
-    contentDescription = "Disconnect"
 )

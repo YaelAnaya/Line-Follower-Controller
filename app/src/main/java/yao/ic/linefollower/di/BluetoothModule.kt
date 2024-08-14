@@ -8,17 +8,18 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityComponent
 import dagger.hilt.android.components.ActivityRetainedComponent
-import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import yao.ic.linefollower.domain.ble.BLEController
 import yao.ic.linefollower.domain.ble.BLEControllerImpl
-import yao.ic.linefollower.domain.ble.BluetoothStateReceiver
 import javax.inject.Singleton
 
 @Module
-@InstallIn(ActivityRetainedComponent::class)
+@InstallIn(ActivityComponent::class)
 object BluetoothModule {
     @Provides
     fun provideBluetoothAdapter(@ApplicationContext context: Context): BluetoothAdapter {
@@ -34,11 +35,6 @@ object BluetoothModule {
     fun provideCompanionDeviceManager(@ApplicationContext context: Context): CompanionDeviceManager =
         context.getSystemService(Context.COMPANION_DEVICE_SERVICE) as CompanionDeviceManager
 
-    @Provides
-    fun provideBluetoothStateReceiver(
-        @Singleton adapter: BluetoothAdapter
-    ): BluetoothStateReceiver = BluetoothStateReceiver(adapter = adapter)
-
 }
 
 @Module
@@ -48,6 +44,11 @@ internal abstract class BLEControllerModule {
     @Singleton
     @Binds
     abstract fun bindBLEController(controller: BLEControllerImpl): BLEController
+
+    companion object {
+        @Provides
+        fun provideCoroutineScope(): CoroutineScope = CoroutineScope(Dispatchers.IO)
+    }
 }
 
 

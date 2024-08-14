@@ -11,15 +11,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import yao.ic.linefollower.data.model.SystemConstant
-import yao.ic.linefollower.data.state.SystemControlState
 import yao.ic.linefollower.data.state.DeviceControlUIState
+import yao.ic.linefollower.data.state.SystemControlState
+import yao.ic.linefollower.ui.LocalWindowSizeClass
 import yao.ic.linefollower.ui.components.ConstantTextField
 
 @Composable
@@ -27,8 +27,8 @@ fun DeviceControlScreen(
     modifier: Modifier = Modifier,
     state: DeviceControlUIState = DeviceControlUIState(),
     onEvent: (DeviceControlEvent) -> Unit = {},
-    windowSizeClass: WindowSizeClass
 ) {
+    val windowSizeClass = LocalWindowSizeClass.current
     val textFieldWidth = if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact) 110 else 180
 
     Column(

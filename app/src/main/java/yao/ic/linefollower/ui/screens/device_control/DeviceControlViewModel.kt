@@ -24,7 +24,6 @@ import yao.ic.linefollower.domain.repository.DeviceConfigurationRepository
 import yao.ic.linefollower.ui.navigation.DeviceControl
 import javax.inject.Inject
 import kotlin.math.nextUp
-import kotlin.math.pow
 import kotlin.math.round
 
 @HiltViewModel
