@@ -74,7 +74,9 @@ dependencies {
     implementation(kotlin("reflect"))
     implementation(libs.kotlinx.serialization)
 
-    implementation(libs.compose.charts)
+    implementation(libs.vico.compose)
+    implementation(libs.vico.compose.m3)
+    implementation(libs.vico.core)
     implementation(libs.material.motion.core)
 
     // Size Class API
