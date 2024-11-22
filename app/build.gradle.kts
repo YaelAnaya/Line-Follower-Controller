@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "yao.ic.linefollower"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "yao.ic.linefollower"

@@ -6,14 +6,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.State
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
-import dagger.hilt.EntryPoints
-import yao.ic.linefollower.di.BLEControllerModule
-import yao.ic.linefollower.domain.ble.BLEController
-import yao.ic.linefollower.domain.ble.BLEControllerImpl
 
 @Composable
 fun BroadcastReceivedEffect(

@@ -9,13 +9,12 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
-import dagger.hilt.android.components.ActivityRetainedComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import yao.ic.linefollower.domain.ble.BLEController
-import yao.ic.linefollower.domain.ble.BLEControllerImpl
+import yao.ic.linefollower.domain.ble.BLEManager
+import yao.ic.linefollower.domain.ble.BLEManagerImpl
 import javax.inject.Singleton
 
 @Module
@@ -39,11 +38,11 @@ object BluetoothModule {
 
 @Module
 @InstallIn(SingletonComponent::class)
-internal abstract class BLEControllerModule {
+internal abstract class BLEManagerModule {
 
     @Singleton
     @Binds
-    abstract fun bindBLEController(controller: BLEControllerImpl): BLEController
+    abstract fun bindBLEManager(controller: BLEManagerImpl): BLEManager
 
     companion object {
         @Provides

@@ -27,79 +27,30 @@ import soup.compose.material.motion.animation.materialSharedAxisYIn
 import soup.compose.material.motion.animation.materialSharedAxisYOut
 import soup.compose.material.motion.animation.rememberSlideDistance
 import yao.ic.linefollower.R
-import yao.ic.linefollower.domain.ble.BLEController
-import yao.ic.linefollower.ui.navigation.BLEScanner
+import yao.ic.linefollower.domain.ble.BLEManager
 
 @SuppressLint("RestrictedApi")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopAppBar(
     modifier: Modifier = Modifier,
-    destination: NavDestination?,
-    controller: BLEController,
-    screenInfo: ScreenInfo = getScreenInfo(destination, controller)
 ) {
-    val controllerState by controller.state.collectAsState()
-    val slideDistance = rememberSlideDistance(slideDistance = 35.dp)
 
-    MaterialMotion(
-        targetState = controllerState.isScanning,
-        label = stringResource(R.string.topappbar_animatedcontent),
-        transitionSpec = { materialSharedAxisYIn(forward = false, slideDistance) togetherWith materialSharedAxisYOut(forward = true, slideDistance) },
-        pop = false
-    ) { state ->
-        TopAppBar(
-            modifier = modifier,
-            title = {
-                if (!state) {
-                    Text(
-                        text = stringResource(screenInfo.titleRes),
-                        style = MaterialTheme.typography.headlineMedium
-                    )
-                }
-            },
-            actions = {
-                if (!state) {
-                    MaterialFadeThrough(targetState = screenInfo.action) { action ->
-                        IconButton(onClick = action.onClick) {
-                            Icon(
-                                imageVector = action.icon,
-                                contentDescription = stringResource(action.descriptionRes)
-                            )
-                        }
-
-                    }
-                }
-
-            },
-        )
-    }
 }
 
 @Composable
 private fun getScreenInfo(
     destination: NavDestination?,
-    controller: BLEController
+    controller: BLEManager
 ): ScreenInfo {
-    val isScanner = destination?.hasRoute<BLEScanner>() == true
 
-    return if (isScanner) {
-        ScreenInfo(
-            titleRes = R.string.scanner_screen_title,
-            action = TopAppBarAction(
-                icon = Icons.Default.Replay,
-                descriptionRes = R.string.scanning_label
-            ) { controller.scanDevices() }
-        )
-    } else {
-        ScreenInfo(
-            titleRes = R.string.default_title,
-            action = TopAppBarAction(
-                icon = Icons.Default.BluetoothDisabled,
-                descriptionRes = R.string.default_title
-            ) { controller.disconnect() }
-        )
-    }
+    return ScreenInfo(
+        titleRes = R.string.default_title,
+        action = TopAppBarAction(
+            icon = Icons.Default.BluetoothDisabled,
+            descriptionRes = R.string.default_title
+        ) { controller.disconnect() }
+    )
 }
 
 data class ScreenInfo(
